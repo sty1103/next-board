@@ -6,6 +6,7 @@ import { getData } from './api/board';
 import Button from '../components/Button';
 import Link from 'next/link';
 import router from 'next/router';
+import React from 'react';
 
 interface IPost {
   num: Number;
@@ -30,7 +31,7 @@ const Home: NextPage<HomeProps> = ({ data }) => {
       </Head>
 
       <div className={styles.wrapper}>
-        <Button onClick={()=>router.push('/post/write')}>
+        <Button onClick={()=>router.push('/write')}>
           글쓰기
         </Button>
         
@@ -46,7 +47,7 @@ const Home: NextPage<HomeProps> = ({ data }) => {
           <tbody>
             {data.map((post, index) => {
               return (
-                <tr key={index} data_id={post.num.toString()} onClick={() => onRowClick(event)}>
+                <tr key={post.num.toString()} onClick={onRowClick}>
                   <td>{post.num.toString()}</td>
                   <td>{post.title}</td>
                   <td>{post.author}</td>
@@ -60,8 +61,9 @@ const Home: NextPage<HomeProps> = ({ data }) => {
     </section>
   )
 
-  function onRowClick(e) {
-    const data_id = e.target.parentElement.getAttribute('data_id');
+  function onRowClick(e: React.MouseEvent<HTMLTableRowElement>) {
+    // const data_id = e.target.parentElement.getAttribute('key');
+    console.log( e.target );
   }
 }
 
