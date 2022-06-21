@@ -15,7 +15,7 @@ const InputField = ({ value, name, placeholder, type, onChange }: Props) => (
       name={name}
       className="form-control"
       placeholder={placeholder}
-      onChange={() => onChange()}
+      onChange={() => onChange(event)}
     />
 );
 
