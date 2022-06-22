@@ -11,4 +11,4 @@ const PostSchema = new Schema({
   versionKey: false
 });
 
-export default mongoose.models.post || mongoose.model('post', PostSchema);
+export default mongoose.models?.post || mongoose.model('post', PostSchema);

@@ -31,7 +31,7 @@ const Home: NextPage<HomeProps> = ({ data }) => {
       </Head>
 
       <div className={styles.wrapper}>
-        <Button onClick={()=>router.push('/write')}>
+        <Button onClick={()=>router.push('/post/write')}>
           글쓰기
         </Button>
         
