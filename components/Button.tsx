@@ -6,9 +6,9 @@ interface ButtonProps {
   onClick: Function;
 }
 
-export default function Button({children, theme, onClick}: ButtonProps) {
+export default function Button({children, theme='primary', onClick}: ButtonProps) {
   return (
-    <button className={styles[`${theme ?? 'primary'}`]} onClick={() => onClick()}>
+    <button className={`btn ${styles[`${theme}`]}`} onClick={() => onClick()}>
       {children}
     </button>
   )

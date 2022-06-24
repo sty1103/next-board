@@ -1,0 +1,21 @@
+@mixin center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.wrapper {
+  @include center;
+  min-width: 500px;
+  flex-direction: column;
+
+  button {
+    margin-left: auto;
+    margin-bottom: 15px;
+  }
+}
+
+.table {
+  min-width: 300px;
+  width: 100%;
+}

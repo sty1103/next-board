@@ -20,49 +20,51 @@ const Write: NextPage = () => {
   });
 
   return (
-    <section className={styles.main}>
-      <table>
-        <tbody>
-          <tr>
-            <td>제목</td>
-            <td>
-              <InputField
-                type="text"
-                value={inputValue.title ?? ''}
-                placeholder="제목을 입력해 주세요"
-                name="title"
-                onChange={onInputChange}
-              />
-            </td>
-          </tr>
-          <tr>
-            <td>작성자</td>
-            <td>
-              <InputField
+    <section className={`main ${styles.main}`}>
+      <div className={`wrapper ${styles.wrapper}`}>
+        <table className="table">
+          <tbody>
+            <tr>
+              <td>제목</td>
+              <td>
+                <InputField
                   type="text"
-                  value={inputValue.author ?? ''}
-                  placeholder="작성자를 입력해 주세요"
-                  name="author"
+                  value={inputValue.title ?? ''}
+                  placeholder="제목을 입력해 주세요"
+                  name="title"
                   onChange={onInputChange}
                 />
-            </td>
-          </tr>
-          <tr>
-            <td>내용</td>
-            <td>
-              <ContentEditable
-                name='content'
-                value={inputValue.content ?? ''}
-                onChange={onInputChange}
-              />
-            </td>
-          </tr>
-        </tbody>
-      </table>
+              </td>
+            </tr>
+            <tr>
+              <td>작성자</td>
+              <td>
+                <InputField
+                    type="text"
+                    value={inputValue.author ?? ''}
+                    placeholder="작성자를 입력해 주세요"
+                    name="author"
+                    onChange={onInputChange}
+                  />
+              </td>
+            </tr>
+            <tr>
+              <td>내용</td>
+              <td>
+                <ContentEditable
+                  name='content'
+                  value={inputValue.content ?? ''}
+                  onChange={onInputChange}
+                />
+              </td>
+            </tr>
+          </tbody>
+        </table>
 
-      <Button onClick={onSave}>
-        저장하기
-      </Button>
+        <Button onClick={onSave}>
+          저장하기
+        </Button>
+      </div>
     </section>
   )
 
@@ -77,7 +79,8 @@ const Write: NextPage = () => {
   };
 
   function onSave() {
-    insertData( inputValue );
+    
+    await insertData( inputValue );
   }
 }
 

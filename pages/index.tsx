@@ -1,12 +1,12 @@
 import type { NextPage } from 'next';
 import Head from 'next/head';
 import Image from 'next/image';
-import styles from '../styles/Home.module.scss';
+import styles from '@/styles/Home.module.scss';
 import { getData } from './api/board';
-import Button from '../components/Button';
+import Button from '@/components/Button';
 import Link from 'next/link';
 import router from 'next/router';
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 
 interface IPost {
   num: Number;
@@ -16,26 +16,46 @@ interface IPost {
 }
 
 interface HomeProps {
-  data: IPost[]
+  data: {
+    rows: IPost[];
+    total: number;
+  }
 }
 
-const Home: NextPage<HomeProps> = ({ data }) => {
-  return (
-    <section className={styles.main}>
-      <Head>
-        <title>게시판 테스트</title>
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reset-css@5.0.1/reset.css"></link>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" />
-        <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@500&display=swap" rel="stylesheet"></link>
-      </Head>
+interface PageInfo {
+  current: number; // 현재 페이지
+  prev: number; // 이전 페이지 범위
+  next: number; // 다음 페이지 범위
+  limit: number; // 한 페이지에서 가져올 데이터 수
+  range: number; // 한 범위의 페이지 갯수
+  total: number; // 한 페이지 그룹의 총 글 개수
+}
 
+const initPageInfo = { current: 1, prev: 0, next: 0, limit: 3, range: 5, total: 0 };
+
+const Home: NextPage = () => {
+  const [ rows, setRows ] = useState<IPost[]>([]);
+  const [ pageInfo, setPageInfo ] = useState<PageInfo>(initPageInfo);
+
+  useEffect(() => async () => {
+    const data = await getData(1, initPageInfo.limit, initPageInfo.range);
+
+    setRows(data.rows);
+    setPageInfo((prev)=>({
+      ...prev,
+      next: pageInfo.range + 1,
+      total: data.total
+    }));
+  }, [])
+
+  return (
+    <section className="main">
       <div className={styles.wrapper}>
         <Button onClick={()=>router.push('/post/write')}>
           글쓰기
         </Button>
         
-        <table className={styles.table}>
+        <table className={`table ${styles.table}`}>
           <thead>
             <tr>
               <th>번호</th>
@@ -45,9 +65,9 @@ const Home: NextPage<HomeProps> = ({ data }) => {
             </tr>
           </thead>
           <tbody>
-            {data.map((post, index) => {
+            {rows.map((post, index) => {
               return (
-                <tr key={post.num.toString()} onClick={onRowClick}>
+                <tr key={index} data-num={post.num.toString()} onClick={onRowClick}>
                   <td>{post.num.toString()}</td>
                   <td>{post.title}</td>
                   <td>{post.author}</td>
@@ -57,19 +77,68 @@ const Home: NextPage<HomeProps> = ({ data }) => {
             })}
           </tbody>
         </table>
+
+        <div className={styles.pagination}>
+          {(() => {
+            if ( pageInfo.prev > 0 )
+              return <span onClick={onPrevClick}>{"<"}</span>;
+          })()}
+          
+          {(() => {
+            let paging = [];
+            let next = pageInfo.next ? pageInfo.next:pageInfo.range+1;
+            let start = next - pageInfo.range;
+            let loop = Math.ceil(pageInfo.total/pageInfo.limit);
+            
+            for( let i=0; i<loop; i++ ) {
+              const num = start + i;
+              paging.push(<a key={num} onClick={()=>onPageClick(num)}>{num}</a>);
+            }
+            
+            return paging;
+          })()}
+
+          {(() => {
+            if ( Math.ceil(pageInfo.total/pageInfo.limit) == pageInfo.range )
+              return <span onClick={onNextClick}>{">"}</span>
+          })()}
+        </div>
       </div>
     </section>
   )
 
   function onRowClick(e: React.MouseEvent<HTMLTableRowElement>) {
-    // const data_id = e.target.parentElement.getAttribute('key');
-    console.log( e.target );
+    router.push(`/post/${e.target.parentElement.dataset.num}` );
+  }
+
+  async function onPrevClick() {
+    onPageClick(pageInfo.prev);
+    setPageInfo((previousData) => ({
+      ...previousData,
+      prev: pageInfo.prev==1 ? 0:pageInfo.prev - pageInfo.range,
+      next: pageInfo.next - pageInfo.range
+    }));
+  }
+
+  function onNextClick() {
+    onPageClick(pageInfo.next);
+    setPageInfo((previousData) => ({
+      ...previousData,
+      prev: pageInfo.prev==0 ? 1:pageInfo.prev + pageInfo.range,
+      next: pageInfo.next + pageInfo.range
+    }));
+  }
+
+  async function onPageClick(page: number) {
+    const data = await getData(page, pageInfo.limit, pageInfo.range);
+    
+    setRows(data.rows);
+    setPageInfo((prev)=>({
+      ...prev,
+      current: page,
+      total: data.total
+    }));
   }
 }
 
 export default Home;
-
-export async function getServerSideProps() {
-  const data = await getData();
-  return { props: { data } };
-}
