@@ -6,6 +6,18 @@ import type { NextApiRequest, NextApiResponse } from 'next'
 import dbconn from '../../utils/dbconn';
 import Post from '../../models/post';
 
+interface GetDataResultTypes {
+  total: number;
+  rows: {
+    _id: string;
+    num: number;
+    title: string;
+    content: string;
+    author: string;
+    date: string;
+  }[]
+}
+
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
@@ -28,30 +40,31 @@ export default async function handler(
     case "DELETE":
     case "PATCH":
     case "GET":
-      let result;
+      if ( req.query.num ) { // 하나만 조회
+        let result = await Post.findOne({num: req.query.num});
+        res.status(200).json(result);
+      } else { // 리스트 조회
+        let result: GetDataResultTypes = { rows:[], total:0 };
+        const page = parseInt(req.query.page as string);
+        const range = parseInt(req.query.range as string);
+        const limit = parseInt(req.query.limit as string);
 
-      if ( req.query.num ) {
-        result = await Post.findOne({num: req.query.num});
-      } else {
-        const skip = Math.floor( (req.query.page-1) / req.query.range ) * (req.query.limit * req.query.range);
+        const skip = Math.floor( (page-1) / range ) * (limit * range);
         const total = await Post
           .find({})
-          .limit(req.query.limit * req.query.range)
+          .limit(limit * range)
           .skip(skip)
           .count();
         
-        result = { total };
-          
-        const data = await Post
+        const rows = await Post
           .find({})
-          .limit(req.query.limit)
-          .skip( (req.query.page-1) * req.query.limit)
+          .limit(limit)
+          .skip( (page-1) * limit)
           .sort({'_id': -1});
         
-        result.rows = data;
+        result= { total, rows }
+        res.status(200).json(result);
       }
-
-      res.status(200).json(result);
       break;
   }
 }

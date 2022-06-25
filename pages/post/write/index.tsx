@@ -78,7 +78,7 @@ const Write: NextPage = () => {
     }));
   };
 
-  function onSave() {
+  async function onSave() {
     
     await insertData( inputValue );
   }

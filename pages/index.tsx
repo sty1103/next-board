@@ -37,15 +37,19 @@ const Home: NextPage = () => {
   const [ rows, setRows ] = useState<IPost[]>([]);
   const [ pageInfo, setPageInfo ] = useState<PageInfo>(initPageInfo);
 
-  useEffect(() => async () => {
-    const data = await getData(1, initPageInfo.limit, initPageInfo.range);
+  useEffect(() => {
+    const getRowsData = async () => {
+      const data = await getData(1, initPageInfo.limit, initPageInfo.range);
 
-    setRows(data.rows);
-    setPageInfo((prev)=>({
-      ...prev,
-      next: pageInfo.range + 1,
-      total: data.total
-    }));
+      setRows(data.rows);
+      setPageInfo((prev)=>({
+        ...prev,
+        next: pageInfo.range + 1,
+        total: data.total
+      }));
+    }
+
+    getRowsData();
   }, [])
 
   return (
@@ -108,7 +112,10 @@ const Home: NextPage = () => {
   )
 
   function onRowClick(e: React.MouseEvent<HTMLTableRowElement>) {
-    router.push(`/post/${e.target.parentElement.dataset.num}` );
+    const target = e.target as Element;
+
+    if ( target.parentElement )
+      router.push(`/post/${target.parentElement.dataset.num}` );
   }
 
   async function onPrevClick() {
